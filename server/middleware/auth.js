@@ -1,7 +1,12 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'cinebook-secret-change-this';
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET is required (missing in environment)');
+}
+
 
 // ============ GENERATE TOKEN ============
 export function generateToken(user) {

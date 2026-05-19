@@ -1,13 +1,14 @@
 import { Router } from 'express';
 import Movie from '../../models/Movie.js';
 import Showtime from '../../models/Showtime.js';
-// import { requireAdmin } from '../../middleware/auth.js';
+import { requireAdmin } from '../../middleware/auth.js';
 import { sendNewMovieNotification } from '../../services/emailService.js';
 import User from '../../models/User.js';
 
 const router = Router();
 
-// router.use(requireAdmin);
+router.use(requireAdmin);
+
 
 /**
  * CREATE

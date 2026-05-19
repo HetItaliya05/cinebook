@@ -1,14 +1,15 @@
 import { Router } from 'express';
-// import { requireAdmin } from '../../middleware/auth.js'; // Temporarily disabled to fix Forbidden error
+import { requireAdmin } from '../../middleware/auth.js';
 import fs from 'fs';
+
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const router = Router();
 
-// TEMPORARILY DISABLED: Re-enable this once your MongoDB user role is set to 'admin'
-// router.use(requireAdmin);
+router.use(requireAdmin);
+
 
 router.post('/', async (req, res) => {
   try {
