@@ -1,10 +1,11 @@
-# TODO
+- [ ] Inspect current server/index.js for port conflict and startup flow
+- [ ] Implement port-in-use detection + automatic fallback (5000 -> 5001)
+- [ ] Add proper server.listen() error handling (EADDRINUSE etc.)
+- [ ] Prevent duplicate server instances on nodemon restart (global guard)
+- [ ] Preserve env.js, Razorpay init, and MongoDB connection behavior
+- [ ] Add clean startup logs
+- [ ] Prevent app crash from uncaught exceptions/unhandled rejections
+- [ ] Replace server/index.js with production-safe final startup code
 
-## Fix: API login/registration failing due to broken phone unique index
-- [ ] Update `server/models/User.js` user schema and indexes to make `phone` optional and use proper partial unique index with `sparse: true`.
-- [ ] Add/verify code path ensures `phone` is not set to `null`/empty in a way that triggers duplicate index.
-- [ ] Provide MongoDB commands to drop old broken `phone_1` index and create correct partial unique index.
-- [ ] Verify registration works when phone is empty/null.
-- [ ] Verify login works after registration (401 issue).
-- [ ] Document production-ready deployment notes.
+- [ ] Run server locally to verify logs and behavior
 
