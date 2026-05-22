@@ -1,13 +1,22 @@
 import { Router } from 'express';
 import Movie from '../../models/Movie.js';
 import Showtime from '../../models/Showtime.js';
+<<<<<<< HEAD
 // import { requireAdmin } from '../../middleware/auth.js';
+=======
+import { requireAdmin } from '../../middleware/auth.js';
+>>>>>>> d4502265145f7864581183a0a2e10a99cafdcf37
 import { sendNewMovieNotification } from '../../services/emailService.js';
 import User from '../../models/User.js';
 
 const router = Router();
 
+<<<<<<< HEAD
 // router.use(requireAdmin);
+=======
+router.use(requireAdmin);
+
+>>>>>>> d4502265145f7864581183a0a2e10a99cafdcf37
 
 /**
  * CREATE

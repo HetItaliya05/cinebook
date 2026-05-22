@@ -66,7 +66,11 @@ export default function BookingPage() {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+<<<<<<< HEAD
   const [paymentMethod, setPaymentMethod] = useState<'cod'>('cod');
+=======
+  const paymentMethod = 'razorpay' as const;
+>>>>>>> d4502265145f7864581183a0a2e10a99cafdcf37
 
   // Auto-fill user details
   useEffect(() => {
@@ -158,8 +162,13 @@ export default function BookingPage() {
     });
   }, []);
 
+<<<<<<< HEAD
   // Create booking
   const createBooking = async (bookingPayload: BookingPayload, paymentId?: string) => {
+=======
+  // Create booking (only after payment is verified)
+  const createBooking = async (bookingPayload: BookingPayload, paymentId: string) => {
+>>>>>>> d4502265145f7864581183a0a2e10a99cafdcf37
     try {
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
@@ -174,7 +183,11 @@ export default function BookingPage() {
         ...bookingPayload,
         payment_method: paymentMethod,
         payment_id: paymentId,
+<<<<<<< HEAD
         payment_status: paymentId ? 'paid' : 'pending',
+=======
+        payment_status: 'paid',
+>>>>>>> d4502265145f7864581183a0a2e10a99cafdcf37
       };
 
       console.log('📤 Sending booking:', payloadWithPayment);
@@ -246,6 +259,7 @@ export default function BookingPage() {
 
     setSubmitting(true);
 
+<<<<<<< HEAD
     // Prepare booking payload
     const bookingPayload: BookingPayload = {
       movie_id: getId(movie),
@@ -259,6 +273,113 @@ export default function BookingPage() {
 
     // Create booking directly (COD only)
     await createBooking(bookingPayload);
+=======
+    try {
+      // Prepare booking payload
+      const bookingPayload: BookingPayload = {
+        movie_id: getId(movie),
+        showtime_id: getId(showtime),
+        customer_name: name.trim(),
+        customer_email: email.trim(),
+        seats: selectedSeatIds.size,
+        // Razorpay expects amount in INR (server will convert to paise)
+        total_price: selectedSeatIds.size * Number(showtime.price),
+        seat_labels: Array.from(selectedSeatIds).sort().join(', '),
+      };
+
+      const amount = Number(bookingPayload.total_price);
+      if (!Number.isFinite(amount) || amount <= 0) {
+        throw new Error('Invalid total amount');
+      }
+
+      // 1) Create Razorpay order
+      const orderRes = await fetch(`${API_BASE_URL}/api/create-order`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          amount,
+          currency: 'INR',
+          receipt: `cinebook_${Date.now()}`,
+        }),
+      });
+
+      const orderData = await orderRes.json();
+      if (!orderRes.ok) {
+        throw new Error(orderData.error || orderData.message || 'Failed to create payment order');
+      }
+
+      // 2) Open Razorpay Checkout
+      await new Promise<void>((resolve, reject) => {
+        const options = {
+          key: import.meta.env.VITE_RAZORPAY_KEY_ID || '',
+          amount: amount * 100, // Razorpay checkout expects paise
+          currency: 'INR',
+          name: 'CineBook',
+          description: 'Movie booking payment',
+          order_id: orderData.id,
+          prefill: {
+            name: name.trim(),
+            email: email.trim(),
+          },
+          theme: {
+            color: '#3399cc',
+          },
+          modal: {
+            ondismiss: () => reject(new Error('Payment cancelled')),
+          },
+          handler: async (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
+            try {
+              const verifyRes = await fetch(`${API_BASE_URL}/api/verify-payment`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                },
+                body: JSON.stringify({
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                }),
+              });
+
+              const verifyData = await verifyRes.json();
+              if (!verifyRes.ok || !verifyData.verified) {
+                throw new Error(verifyData.error || verifyData.message || 'Payment verification failed');
+              }
+
+              // 3) Create booking after successful verification
+              await createBooking(bookingPayload, response.razorpay_payment_id);
+              resolve();
+            } catch (err) {
+              reject(err instanceof Error ? err : new Error('Payment verification failed'));
+            }
+          },
+        };
+
+        if (!options.key) {
+          reject(new Error('Missing VITE_RAZORPAY_KEY_ID. Set your Razorpay TEST key id in frontend env.'));
+          return;
+        }
+
+        const RzpCtor = window.Razorpay;
+        if (!RzpCtor) {
+          reject(new Error('Razorpay checkout script not loaded. Add Razorpay checkout.js to your app.'));
+          return;
+        }
+
+        const rzp = new RzpCtor(options);
+        rzp.open();
+      });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Booking failed. Please try again.';
+      setError(errorMessage);
+      console.error('❌ Booking error:', err);
+      setSubmitting(false);
+    }
+>>>>>>> d4502265145f7864581183a0a2e10a99cafdcf37
   };
 
   // Send confirmation email (separate function, non-blocking)
@@ -507,17 +628,28 @@ export default function BookingPage() {
                 </div>
               </div>
 
+<<<<<<< HEAD
               {/* Payment Method - Only COD available */}
+=======
+              {/* Payment Method - Razorpay */}
+>>>>>>> d4502265145f7864581183a0a2e10a99cafdcf37
               <div>
                 <label className="text-xs text-text-muted uppercase tracking-wider block mb-2">
                   Payment Method
                 </label>
                 <div className="flex items-center justify-center gap-2 py-3 bg-accent/10 border border-accent text-accent rounded-lg">
                   <Wallet className="w-4 h-4" />
+<<<<<<< HEAD
                   <span className="text-sm font-medium">Pay at Theater</span>
                 </div>
                 <p className="text-xs text-text-muted mt-2">
                   Pay cash at the theater counter before the show
+=======
+                  <span className="text-sm font-medium">Pay with Razorpay</span>
+                </div>
+                <p className="text-xs text-text-muted mt-2">
+                  Secure online payment via Razorpay
+>>>>>>> d4502265145f7864581183a0a2e10a99cafdcf37
                 </p>
               </div>
 
@@ -599,7 +731,11 @@ export default function BookingPage() {
                     <Wallet className="w-4 h-4" />
                     {seatCount === 0
                       ? 'Select Seats to Continue'
+<<<<<<< HEAD
                       : `Book ${seatCount} ${seatCount === 1 ? 'Ticket' : 'Tickets'} (Pay at Theater)`}
+=======
+                      : `Pay & Book ${seatCount} ${seatCount === 1 ? 'Ticket' : 'Tickets'}`}
+>>>>>>> d4502265145f7864581183a0a2e10a99cafdcf37
                   </>
                 )}
               </button>

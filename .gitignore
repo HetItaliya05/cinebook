@@ -24,3 +24,7 @@ dist-ssr
 *.sw?
 .vite-source-tags.js
 .vercel
+<<<<<<< HEAD
+=======
+.env
+>>>>>>> d4502265145f7864581183a0a2e10a99cafdcf37
